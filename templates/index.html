@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magic Photo Editor</title>
+    <!-- Font & Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+    <!-- CSS Libraries -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+    />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --danger: #f72585;
+        --success: #4cc9f0;
+        --warning: #f8961e;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      [data-theme="dark"] {
+        --primary: #4895ef;
+        --primary-dark: #3f7fd1;
+        --secondary: #4361ee;
+        --accent: #3f37c9;
+        --light: #212529;
+        --dark: #f8f9fa;
+        --gray: #adb5bd;
+        --light-gray: #343a40;
+        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--light);
+        color: var(--dark);
+        transition: var(--transition);
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        margin-bottom: 30px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .app-title {
+        font-family: "Montserrat", sans-serif;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .app-title .material-icons-round {
+        font-size: 2.5rem;
+      }
+
+      .theme-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--dark);
+        font-size: 1.8rem;
+        transition: var(--transition);
+        padding: 8px;
+        border-radius: 50%;
+      }
+
+      .theme-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      /* Upload Section */
+      .upload-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 30px;
+        margin-bottom: 30px;
+        transition: var(--transition);
+        background-color: var(--light);
+      }
+
+      .upload-area {
+        border: 2px dashed var(--primary);
+        border-radius: var(--border-radius);
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .upload-area:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .upload-icon {
+        font-size: 3.5rem;
+        color: var(--primary);
+        margin-bottom: 15px;
+        transition: var(--transition);
+      }
+
+      .upload-text h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: var(--dark);
+      }
+
+      .upload-text p {
+        color: var(--gray);
+        font-size: 0.95rem;
+      }
+
+      /* Tabs */
+      .tabs-container {
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 5px;
+        margin-bottom: -1px;
+      }
+
+      .tab {
+        padding: 14px 28px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: var(--transition);
+        font-weight: 500;
+        color: var(--gray);
+        position: relative;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+      }
+
+      .tab.active {
+        color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.05);
+        border-bottom: 3px solid var(--primary);
+      }
+
+      .tab-indicator {
+        position: absolute;
+        height: 3px;
+        background-color: var(--primary);
+        bottom: 0;
+        left: 0;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Control Cards */
+      .control-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 25px;
+        margin-bottom: 25px;
+        transition: var(--transition);
+        background-color: var(--light);
+      }
+
+      .control-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .control-card h3 {
+        margin-bottom: 20px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.2rem;
+      }
+
+      .control-card h3 .material-icons-round {
+        font-size: 1.5rem;
+      }
+
+      .control-group {
+        margin-bottom: 20px;
+      }
+
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .control-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: var(--dark);
+      }
+
+      /* Form Elements */
+      .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius);
+        background-color: var(--light);
+        color: var(--dark);
+        font-size: 1rem;
+        transition: var(--transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 1em;
+      }
+
+      .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+
+      /* Sliders */
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .slider-container input[type="range"] {
+        flex-grow: 1;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--light-gray);
+        outline: none;
+        -webkit-appearance: none;
+        transition: var(--transition);
+      }
+
+      .slider-container input[type="range"]:hover {
+        background: #ced4da;
+      }
+
+      .slider-container input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+      }
+
+      .slider-value {
+        min-width: 50px;
+        text-align: center;
+        background: rgba(67, 97, 238, 0.1);
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        color: var(--primary);
+      }
+
+      /* Radio & Checkbox */
+      .radio-group,
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .radio-option,
+      .checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .radio-option input[type="radio"],
+      .checkbox-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+        cursor: pointer;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .btn-secondary {
+        background-color: var(--accent);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: #3a7bc8;
+      }
+
+      .btn-danger {
+        background-color: var(--danger);
+        color: white;
+      }
+
+      .btn-success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-outline:hover {
+        background-color: rgba(67, 97, 238, 0.1);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      /* Image Preview */
+      .image-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .image-container {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 25px;
+        transition: var(--transition);
+        background-color: var(--light);
+      }
+
+      .image-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .image-container h3 {
+        margin-bottom: 20px;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.3rem;
+      }
+
+      .image-container img {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+      }
+
+      /* Cropper */
+      .cropper-container {
+        margin: 20px auto;
+        max-width: 100%;
+      }
+
+      /* Responsive */
+      @media (max-width: 992px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+
+        .image-preview {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .app-title {
+          font-size: 1.8rem;
+        }
+
+        .upload-area {
+          padding: 30px;
+        }
+
+        .btn {
+          padding: 10px 18px;
+          font-size: 0.9rem;
+        }
+
+        .tabs {
+          overflow-x: auto;
+          white-space: nowrap;
+          padding-bottom: 10px;
+          scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+          display: none;
+        }
+
+        .tab {
+          padding: 12px 20px;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .container {
+          padding: 15px;
+        }
+
+        .upload-card {
+          padding: 20px;
+        }
+
+        .upload-area {
+          padding: 20px;
+        }
+
+        .control-card {
+          padding: 20px;
+        }
+
+        .slider-container {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .btn-group {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- App Header -->
+      <header class="app-header">
+        <h1 class="app-title">
+          <span class="material-icons-round">photo_camera</span>
+          Magic Photo Editor
+        </h1>
+        <button class="theme-toggle" id="themeToggle">
+          <span class="material-icons-round">brightness_4</span>
+        </button>
+      </header>
+
+      <!-- Upload Section -->
+      <section class="upload-card">
+        <form
+          action="/upload"
+          method="post"
+          enctype="multipart/form-data"
+          id="uploadForm"
+        >
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">
+              <span class="material-icons-round">cloud_upload</span>
+            </div>
+            <div class="upload-text">
+              <h3>Kéo thả ảnh vào đây hoặc click để chọn</h3>
+              <p>Hỗ trợ: JPG, PNG, GIF (Tối đa 10MB)</p>
+            </div>
+            <input
+              type="file"
+              name="file"
+              id="fileInput"
+              accept="image/*"
+              style="display: none"
+            />
+          </div>
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <span class="material-icons-round">upload</span>
+              Tải Ảnh Lên
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {% if uploaded_img %}
+      <!-- Main Editor -->
+      <div class="editor-container">
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+          <div class="tabs">
+            <div class="tab active" data-tab="filters">
+              <span class="material-icons-round">filter</span>
+              Bộ Lọc
+            </div>
+            <div class="tab" data-tab="adjustments">
+              <span class="material-icons-round">tune</span>
+              Điều Chỉnh
+            </div>
+            <div class="tab" data-tab="effects">
+              <span class="material-icons-round">auto_fix_high</span>
+              Hiệu Ứng
+            </div>
+            <div class="tab" data-tab="tools">
+              <span class="material-icons-round">build</span>
+              Công Cụ
+            </div>
+            <div class="tab-indicator"></div>
+          </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <form action="/process" method="post" id="processForm">
+          <input type="hidden" name="uploaded_img" value="{{ uploaded_img }}" />
+          <input
+            type="hidden"
+            name="thumbnail_img"
+            value="{{ thumbnail_img }}"
+          />
+
+          <!-- Filters Tab -->
+          <div class="tab-content active" id="filters">
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">palette</span> Bộ Lọc Màu Sắc
+              </h3>
+              <div class="control-group">
+                <select name="filter" class="form-select">
+                  <option value="none">Không Lọc</option>
+                  <option value="grayscale">Trắng Đen</option>
+                  <option value="blur">Làm Mờ</option>
+                  <option value="enhance">Tăng Chi Tiết</option>
+                  <option value="sharpen">Làm Sắc Nét</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Adjustments Tab -->
+          <div class="tab-content" id="adjustments">
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">brightness_6</span> Điều
+                Chỉnh Cơ Bản
+              </h3>
+              <div class="control-group">
+                <label>Độ Sáng</label>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    name="brightness"
+                    min="0.1"
+                    max="3.0"
+                    step="0.1"
+                    value="1.0"
+                    oninput="document.getElementById('brightnessValue').textContent = this.value"
+                  />
+                  <span class="slider-value" id="brightnessValue">1.0</span>
+                </div>
+              </div>
+              <div class="control-group">
+                <label>Độ Tương Phản</label>
+                <div class="slider-container">
+                  <input
+                    type="range"
+                    name="contrast"
+                    min="0.1"
+                    max="3.0"
+                    step="0.1"
+                    value="1.0"
+                    oninput="document.getElementById('contrastValue').textContent = this.value"
+                  />
+                  <span class="slider-value" id="contrastValue">1.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Effects Tab -->
+          <div class="tab-content" id="effects">
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">auto_fix_high</span> Hiệu Ứng
+                Nâng Cao
+              </h3>
+              <div class="control-group">
+                <label>Phát Hiện Cạnh</label>
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <input type="radio" name="edge" value="none" checked />
+                    Không
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="edge" value="canny" />
+                    Canny
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="edge" value="sobel" />
+                    Sobel
+                  </label>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="checkbox-option">
+                  <input type="checkbox" name="face_detect" value="on" />
+                  Nhận Diện Khuôn Mặt
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tools Tab -->
+          <div class="tab-content" id="tools">
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">transform</span> Biến Đổi
+                Hình Ảnh
+              </h3>
+              <div class="control-group">
+                <label>Xoay Ảnh</label>
+                <select name="rotate" class="form-select">
+                  <option value="0">0°</option>
+                  <option value="90">90°</option>
+                  <option value="180">180°</option>
+                  <option value="270">270°</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Lật Ảnh</label>
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <input type="radio" name="flip" value="none" checked />
+                    Không Lật
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="flip" value="horizontal" />
+                    Lật Ngang
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="flip" value="vertical" />
+                    Lật Dọc
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">crop</span> Cắt Chỉnh Ảnh
+              </h3>
+              <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="startCrop">
+                  <span class="material-icons-round">crop_free</span>
+                  Bắt Đầu Crop
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="applyCrop"
+                  style="display: none"
+                >
+                  <span class="material-icons-round">check</span>
+                  Áp Dụng
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="cancelCrop"
+                  style="display: none"
+                >
+                  <span class="material-icons-round">close</span>
+                  Hủy Bỏ
+                </button>
+              </div>
+            </div>
+
+            <div class="control-card">
+              <h3>
+                <span class="material-icons-round">file_download</span> Xuất Ảnh
+              </h3>
+              <div class="control-group">
+                <label>Định Dạng</label>
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <input
+                      type="radio"
+                      name="format"
+                      value="original"
+                      checked
+                    />
+                    Giữ Nguyên
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="format" value="jpg" />
+                    JPG
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="format" value="png" />
+                    PNG
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden Crop Form -->
+          <form
+            id="cropForm"
+            action="/crop"
+            method="post"
+            style="display: none"
+          >
+            <input
+              type="hidden"
+              name="uploaded_img"
+              value="{{ uploaded_img }}"
+            />
+            <input type="hidden" name="x" id="cropX" />
+            <input type="hidden" name="y" id="cropY" />
+            <input type="hidden" name="width" id="cropWidth" />
+            <input type="hidden" name="height" id="cropHeight" />
+          </form>
+
+          <!-- Action Buttons -->
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+              <span class="material-icons-round">auto_fix_high</span>
+              Áp Dụng Hiệu Ứng
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              onclick="location.href='/'"
+            >
+              <span class="material-icons-round">refresh</span>
+              Làm Mới
+            </button>
+            {% if processed_img %}
+            <button
+              type="button"
+              class="btn btn-success"
+              onclick="location.href='/download'"
+            >
+              <span class="material-icons-round">file_download</span>
+              Tải Xuống
+            </button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview">
+        <div class="image-container">
+          <h3><span class="material-icons-round">image</span> Ảnh Gốc</h3>
+          <img id="sourceImage" src="{{ thumbnail_img }}" alt="Ảnh Gốc" />
+        </div>
+        {% if processed_img %}
+        <div class="image-container">
+          <h3><span class="material-icons-round">adjust</span> Ảnh Đã Xử Lý</h3>
+          <img src="{{ processed_img }}" alt="Ảnh Đã Xử Lý" />
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+      // Theme Toggle
+      const themeToggle = document.getElementById("themeToggle");
+      themeToggle.addEventListener("click", () => {
+        const newTheme =
+          document.documentElement.getAttribute("data-theme") === "light"
+            ? "dark"
+            : "light";
+        document.documentElement.setAttribute("data-theme", newTheme);
+
+        // Update icon
+        themeToggle.innerHTML =
+          newTheme === "light"
+            ? '<span class="material-icons-round">brightness_4</span>'
+            : '<span class="material-icons-round">brightness_7</span>';
+
+        // Save preference to localStorage
+        localStorage.setItem("theme", newTheme);
+      });
+
+      // Check for saved theme preference
+      const savedTheme = localStorage.getItem("theme") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      themeToggle.innerHTML =
+        savedTheme === "light"
+          ? '<span class="material-icons-round">brightness_4</span>'
+          : '<span class="material-icons-round">brightness_7</span>';
+
+      // Tab System
+      const tabs = document.querySelectorAll(".tab");
+      const tabContents = document.querySelectorAll(".tab-content");
+      const tabIndicator = document.querySelector(".tab-indicator");
+
+      function setActiveTab(tab) {
+        // Remove active class from all tabs and contents
+        tabs.forEach((t) => t.classList.remove("active"));
+        tabContents.forEach((c) => c.classList.remove("active"));
+
+        // Add active class to clicked tab and corresponding content
+        tab.classList.add("active");
+        const tabId = tab.getAttribute("data-tab");
+        document.getElementById(tabId).classList.add("active");
+
+        // Update tab indicator position
+        const tabRect = tab.getBoundingClientRect();
+        const tabsRect = document
+          .querySelector(".tabs")
+          .getBoundingClientRect();
+        tabIndicator.style.width = `${tabRect.width}px`;
+        tabIndicator.style.left = `${tabRect.left - tabsRect.left}px`;
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => setActiveTab(tab));
+      });
+
+      // Initialize tab indicator position
+      const activeTab = document.querySelector(".tab.active");
+      if (activeTab) {
+        const tabRect = activeTab.getBoundingClientRect();
+        const tabsRect = document
+          .querySelector(".tabs")
+          .getBoundingClientRect();
+        tabIndicator.style.width = `${tabRect.width}px`;
+        tabIndicator.style.left = `${tabRect.left - tabsRect.left}px`;
+      }
+
+      // Upload Area Click
+      const uploadArea = document.getElementById("uploadArea");
+      const fileInput = document.getElementById("fileInput");
+
+      uploadArea.addEventListener("click", () => fileInput.click());
+
+      // File Input Change
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+          document.getElementById("uploadForm").submit();
+        }
+      });
+
+      // Drag and Drop
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.style.backgroundColor = "rgba(67, 97, 238, 0.1)";
+        uploadArea.style.borderColor = "var(--primary)";
+      });
+
+      uploadArea.addEventListener("dragleave", () => {
+        uploadArea.style.backgroundColor = "";
+        uploadArea.style.borderColor = "var(--primary)";
+      });
+
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.style.backgroundColor = "";
+        uploadArea.style.borderColor = "var(--primary)";
+
+        if (e.dataTransfer.files.length > 0) {
+          fileInput.files = e.dataTransfer.files;
+          document.getElementById("uploadForm").submit();
+        }
+      });
+
+      // Cropper Functionality
+      let cropper;
+      const sourceImage = document.getElementById("sourceImage");
+      const startCropBtn = document.getElementById("startCrop");
+      const applyCropBtn = document.getElementById("applyCrop");
+      const cancelCropBtn = document.getElementById("cancelCrop");
+
+      startCropBtn.addEventListener("click", () => {
+        // Show crop buttons
+        startCropBtn.style.display = "none";
+        applyCropBtn.style.display = "inline-block";
+        cancelCropBtn.style.display = "inline-block";
+
+        // Initialize cropper
+        cropper = new Cropper(sourceImage, {
+          aspectRatio: NaN,
+          viewMode: 1,
+          autoCropArea: 0.8,
+          responsive: true,
+          movable: true,
+          zoomable: true,
+          rotatable: false,
+          guides: true,
+          highlight: false,
+          background: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+        });
+      });
+
+      applyCropBtn.addEventListener("click", () => {
+        // Get crop data
+        const cropData = cropper.getData();
+
+        // Fill crop form
+        document.getElementById("cropX").value = Math.round(cropData.x);
+        document.getElementById("cropY").value = Math.round(cropData.y);
+        document.getElementById("cropWidth").value = Math.round(cropData.width);
+        document.getElementById("cropHeight").value = Math.round(
+          cropData.height
+        );
+
+        // Submit crop form
+        document.getElementById("cropForm").submit();
+      });
+
+      cancelCropBtn.addEventListener("click", () => {
+        // Destroy cropper
+        if (cropper) {
+          cropper.destroy();
+        }
+
+        // Reset buttons
+        startCropBtn.style.display = "inline-block";
+        applyCropBtn.style.display = "none";
+        cancelCropBtn.style.display = "none";
+
+        // Reset image
+        sourceImage.style.transform = "";
+      });
+
+      // Initialize slider values
+      document.getElementById("brightnessValue").textContent =
+        document.querySelector('input[name="brightness"]').value;
+      document.getElementById("contrastValue").textContent =
+        document.querySelector('input[name="contrast"]').value;
+    </script>
+  </body>
+</html>
